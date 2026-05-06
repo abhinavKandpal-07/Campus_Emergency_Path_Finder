@@ -1,30 +1,34 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <string.h>
 #include "graph.h"
 #include "dijkstra.h"
-#include "bfs.h"
 #include "locations.h"
 
-int main() {
+// convert name->index
+int getLocationIndex(char input[]){
+    for(int i = 0; i < V; i++){
+        if(strcmp(input, locations[i]) == 0)
+            return i;
+    }
+    return -1;
+}
 
+int main(){
     struct Node* graph[V];
-    int choice;
-
     initGraph(graph);
 
+    int choice;
+    char name[50];
+    int userNode, emergencyNode;
+
     while(1){
-        printf("\n========================================\n");
-        printf("   CAMPUS EMERGENCY PATH FINDER SYSTEM\n");
-        printf("========================================\n");
-
+        printf("\n=========== MENU ===========\n");
         printf("1. Show Campus Map\n");
-        printf("2. Find Shortest Path (Dijkstra)\n");
-        printf("3. Evacuation Order (BFS)\n");
-        printf("4. Simulate Emergency\n");
+        printf("2. Find Evacuation Route\n");
+        printf("3. Add Emergency Location\n");
+        printf("4. Reset System\n");
         printf("5. Exit\n");
-
-        printf("----------------------------------------\n");
-        printf("Enter your choice: ");
-
+        printf("Enter choice: ");
         scanf("%d", &choice);
 
         switch(choice){
@@ -32,29 +36,44 @@ int main() {
             case 1:
                 printGraph(graph);
                 break;
+
             case 2:
-                dijkstra(graph, 0);
+                printf("Enter your location name: ");
+                scanf(" %[^\n]", name);
+
+                userNode = getLocationIndex(name);
+
+                if(userNode == -1) {
+                    printf("Invalid location name\n");
+                    break;
+                }
+
+                dijkstraMultiExit(graph, userNode);
                 break;
+
             case 3:
-                bfs(graph, 0);
+                printf("Enter emergency location name: ");
+                scanf(" %[^\n]", name);
+
+                emergencyNode = getLocationIndex(name);
+
+                if(emergencyNode == -1) {
+                    printf("Invalid location name\n");
+                    break;
+                }
+
+                setEmergency(emergencyNode);
+                printf("%s marked as DANGER\n", locations[emergencyNode]);
                 break;
-            case 4: {
-                int u, v;
-                printf("\n----------------------------------------\n");
-                printf("Emergency Simulation\n");
-                printf("----------------------------------------\n");
 
-                printf("Enter locations to block (u v): ");
-                scanf("%d %d", &u, &v);
-
-                blockPath(graph, u, v);
-
-                printf("Blocked path between %s and %s\n", locations[u], locations[v]);
+            case 4:
+                resetEmergency();
+                printf("System reset. All locations are safe now.\n");
                 break;
-            }
+
             case 5:
-                printf("Exiting...");
                 return 0;
+
             default:
                 printf("Invalid choice\n");
         }
