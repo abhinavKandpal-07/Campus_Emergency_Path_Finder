@@ -1,9 +1,13 @@
-#include<stdio.h>
-#include<limits.h>
+#include <stdio.h>
+#include <limits.h>
 #include "dijkstra.h"
 #include "locations.h"
 
-int minDistance(int dist[], int visited[]) {
+extern int danger[V];
+
+int exits[] = {5, 7};
+
+int minDistance(int dist[], int visited[]){
     int min = INT_MAX, index = -1;
 
     for(int i = 0; i < V; i++) {
@@ -15,16 +19,8 @@ int minDistance(int dist[], int visited[]) {
     return index;
 }
 
-void printPath(int parent[], int j) {
-    if(parent[j] == -1)
-        return;
-
-    printPath(parent, parent[j]);
-    printf(" -> %s", locations[j]);
-}
-
-void dijkstra(struct Node* adjList[], int src) {
-    int dist[V], visited[V], parent[V];
+void runDijkstra(struct Node* adjList[], int src, int dist[], int parent[]){
+    int visited[V];
 
     for(int i = 0; i < V; i++) {
         dist[i] = INT_MAX;
@@ -36,35 +32,68 @@ void dijkstra(struct Node* adjList[], int src) {
 
     for(int count = 0; count < V - 1; count++) {
         int u = minDistance(dist, visited);
+
+        if(u == -1) break;
+
         visited[u] = 1;
 
         struct Node* temp = adjList[u];
-
         while(temp) {
             int v = temp->vertex;
             int w = temp->weight;
 
-            if(!visited[v] && w > 0 && dist[u] + w < dist[v]) {
+            if(!visited[v] && danger[v] == 0 && dist[u] + w < dist[v]) {
                 dist[v] = dist[u] + w;
                 parent[v] = u;
             }
+
             temp = temp->next;
         }
     }
+}
 
-    printf("\n========================================\n");
-    printf("Shortest Paths from %s\n", locations[src]);
-    printf("========================================\n");
+void printPath(int parent[], int node) {
+    if(parent[node] == -1) return;
+    printf(" -> %s", locations[parent[node]]);
+    printPath(parent, parent[node]);
+}
 
-    for(int i = 0; i < V; i++) {
-        printf("%-12s : ", locations[i]);
+void dijkstraMultiExit(struct Node* adjList[], int userNode) {
+    int bestDist = INT_MAX;
+    int bestExit = -1;
+    int finalParent[V];
 
-        if(dist[i] == INT_MAX) {
-            printf("Not reachable\n");
-        } else {
-            printf("%3d | Path: %s", dist[i], locations[src]);
-            printPath(parent, i);
-            printf("\n");
+    if(danger[userNode]) {
+        printf("\nWARNING: You are in a dangerous location!\n");
+    }
+
+    for(int e = 0; e < 2; e++) {
+        int dist[V], parent[V];
+
+        runDijkstra(adjList, exits[e], dist, parent);
+
+        if(dist[userNode] < bestDist) {
+            bestDist = dist[userNode];
+            bestExit = exits[e];
+
+            for(int i = 0; i < V; i++)
+                finalParent[i] = parent[i];
         }
     }
+
+    printf("\n=========== Evacuation Route ===========\n");
+
+    if(bestDist == INT_MAX) {
+        printf("No safe path available from %s\n", locations[userNode]);
+        return;
+    }
+
+    printf("%s -> %s | Distance: %d\nPath: %s",
+           locations[userNode],
+           locations[bestExit],
+           bestDist,
+           locations[userNode]);
+
+    printPath(finalParent, userNode);
+    printf("\n");
 }
