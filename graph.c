@@ -1,9 +1,11 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "graph.h"
 #include "locations.h"
 
-struct Node* createNode(int v, int w) {
+int danger[V] = {0};
+
+struct Node* createNode(int v, int w){
     struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
     newNode->vertex = v;
     newNode->weight = w;
@@ -11,7 +13,7 @@ struct Node* createNode(int v, int w) {
     return newNode;
 }
 
-void addEdge(struct Node* adjList[], int u, int v, int w) {
+void addEdge(struct Node* adjList[], int u, int v, int w){
     struct Node* node = createNode(v, w);
     node->next = adjList[u];
     adjList[u] = node;
@@ -31,15 +33,22 @@ void initGraph(struct Node* adjList[]) {
     addEdge(adjList, 2, 4, 5);
     addEdge(adjList, 3, 4, 2);
     addEdge(adjList, 4, 5, 3);
+
+    addEdge(adjList, 0, 8,6);
+    addEdge(adjList, 8, 9, 4);
+    addEdge(adjList, 9, 4, 6);
+    addEdge(adjList, 3, 6, 4);
+    addEdge(adjList, 6, 7, 3);
 }
 
-void printGraph(struct Node* adjList[]) {
-    printf("\n========================================\n");
-    printf("Campus Map (Adjacency List Representation)\n");
-    printf("========================================\n");
+void printGraph(struct Node* adjList[]){
+    printf("\n=========== Campus Map ===========\n");
 
     for(int i = 0; i < V; i++) {
-        printf("%s(%d) : ", locations[i], i);
+        if(danger[i])
+            printf("%s [DANGER] : ", locations[i]);
+        else
+            printf("%s : ", locations[i]);
 
         struct Node* temp = adjList[i];
         while(temp) {
@@ -51,18 +60,11 @@ void printGraph(struct Node* adjList[]) {
     }
 }
 
-void blockPath(struct Node* adjList[], int u, int v) {
-    struct Node* temp = adjList[u];
-    while(temp) {
-        if(temp->vertex == v)
-            temp->weight = 0;
-        temp = temp->next;
-    }
+void setEmergency(int node) {
+    danger[node] = 1;
+}
 
-    temp = adjList[v];
-    while(temp) {
-        if(temp->vertex == u)
-            temp->weight = 0;
-        temp = temp->next;
-    }
+void resetEmergency() {
+    for(int i = 0; i < V; i++)
+        danger[i] = 0;
 }
