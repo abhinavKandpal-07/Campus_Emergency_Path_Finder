@@ -1,8 +1,6 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#define V 6
-
 struct Node {
     int vertex;
     int weight;
@@ -11,6 +9,9 @@ struct Node {
 
 void initGraph(struct Node* adjList[]);
 void printGraph(struct Node* adjList[]);
-void blockPath(struct Node* adjList[], int u, int v);
+void addEdge(struct Node* adjList[], int u, int v, int w);
+
+void setEmergency(int node);
+void resetEmergency();
 
 #endif
