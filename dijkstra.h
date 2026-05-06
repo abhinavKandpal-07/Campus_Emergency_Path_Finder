@@ -3,6 +3,6 @@
 
 #include "graph.h"
 
-void dijkstra(struct Node* adjList[], int src);
+void dijkstraMultiExit(struct Node* adjList[], int userNode);
 
 #endif
